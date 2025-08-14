@@ -1,4 +1,4 @@
-import { View, Text } from "react-native";
+import { View, Text, Button } from "react-native";
 
 export default function App() {
   return (
@@ -9,7 +9,11 @@ export default function App() {
         alignItems: "center",
       }}
     >
-      <Text>Universal React with Expo</Text>
+      <Text>Olá Mundo!!</Text>
+      < Button
+       title="Learn More"
+  color="#841584"
+  accessibilityLabel="Learn more about this purple button" />
     </View>
   );
 }
