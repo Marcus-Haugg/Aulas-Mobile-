@@ -66,7 +66,7 @@ export default function App() {
           <Text style={{ marginBottom: 8 }}>Adquira um novo curso para continuar aprendendo!</Text>
           <View style={estilos.botaoCTA}>
           <Button title="COMPRAR CURSO" color="#f7f4f7ff"/>
-        </View>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
