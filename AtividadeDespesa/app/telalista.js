@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet,Button} from "react-native";
+import { View, Text, StyleSheet,Button, TextInput} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
 import * as SQLite from 'expo-sqlite';
 
@@ -33,7 +34,7 @@ export default function sqlite() {
   const [despesas, setDespesas] = useState(getDespesas());
 
   function salvarDescricao() {
-    const descricao = texto.trim();
+    const descricao = descricao.trim();
     if (!descricao) return;
     insertDespesas(descricao);
     setTexto("");
@@ -50,11 +51,31 @@ export default function sqlite() {
   }
 
     return (
+      <SafeAreaView style={estilos.areaSegura}>
        <View style={estilos.cabecalho}>
                <Text style={estilos.textoPrincipal}>Olá Marcus!</Text>
                <Text style={estilos.subtexto}>Quais são as suas despesas?</Text>
            
-         </View>
+        </View>
+
+        <View style={estilos.linhaEntrada}>
+          <TextInput
+          value={setDescricao}
+          placeholder="Descrição..."
+          placeholderTextColor="#999"
+          style={estilos.campoTexto}/>
+        </View>
+
+          <View style={estilos.linhaEntrada}>
+          <TextInput
+          value={setValor}
+          placeholder="Valor R$"
+          placeholderTextColor="#999"
+          style={estilos.campoTexto}/>
+        </View>
+
+
+      </SafeAreaView>   
 
 
              
@@ -98,33 +119,21 @@ const estilos = StyleSheet.create({
     color: "#000"
   },
 
-  lista: {
-    marginTop: 20,
-    width: "100%"
+linhaEntrada: { 
+    marginTop: 15,
+    flexDirection: "row", 
+    alignItems: "center", 
+    marginBottom: 8, 
+    gap: 8 
   },
 
-  item: {
-    padding: 15,
-    marginVertical: 5,
-    backgroundColor: "#ce1414ff",
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#bd0c0cff",
-    fontSize: 16,
+campoTexto: { 
+    flex: 1, 
+    borderWidth: 1, 
+    borderColor: "#020202ff", 
+    borderRadius: 8, 
+    paddingHorizontal: 12, 
+    height: 44 
   },
-
-  botao: {
-    flex: 1,
-    marginHorizontal: 5,
-  },
-
-  containerBotao: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-    marginTop: 10
-
-  }
-
 
 })
