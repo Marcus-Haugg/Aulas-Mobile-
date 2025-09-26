@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet,Button, TextInput} from "react-native";
+import { View, Text, StyleSheet, Button, TextInput, FlatList, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
 import * as SQLite from 'expo-sqlite';
@@ -13,8 +13,13 @@ db.execSync(`
 );
 `);
 
-function getDespesas(){
+function getDespesas() {
   return db.getAllSync('SELECT * FROM despesas');
+}
+
+function somaDespesas() {
+  const result = db.getAllSync('SELECT SUM(valor)  AS total  FROM despesas');
+  result[0]?.total || 0;
 }
 
 function insertDespesa(descricao, valor) {
@@ -24,62 +29,93 @@ function insertDespesa(descricao, valor) {
   ]);
 }
 
+function deleteAllDespesas() {
+  db.runSync("DELETE FROM despesas");
+}
+
 
 
 
 export default function sqlite() {
 
   const [descricao, setDescricao] = useState("");
-  const [valor, setValor] = useState([]);
-  const [despesas, setDespesas] = useState(getDespesas());
+  const [valor, setValor] = useState("");
+  const [despesas, setDespesas] = useState([]);
+  const [totalDespesas, setTotalDespesas] = useState(0);
 
-  function salvarDescricao() {
-    const descricao = descricao.trim();
-    if (!descricao) return;
-    insertDespesas(descricao);
-    setTexto("");
+  function Salvar() {
+    if (!descricao.trim() || !valor.trim()) return;
+    insertDespesa(descricao.trim(), parseFloat(valor));
+    setDescricao("");
+    setValor("");
+    carregarDespesas();
   }
-
-    function salvarValor() {
-    const valor = texto.trim();
-    if (!valor) return;
-    insertDespesas(valor);
-  }
-
   function carregarDespesas() {
     setDespesas(getDespesas());
   }
 
-    return (
-      <SafeAreaView style={estilos.areaSegura}>
-       <View style={estilos.cabecalho}>
-               <Text style={estilos.textoPrincipal}>Olá Marcus!</Text>
-               <Text style={estilos.subtexto}>Quais são as suas despesas?</Text>
-           
-        </View>
+  function limparTudo() {
+    deleteAllDespesas();
+    setDespesas([]);
+  }
 
-        <View style={estilos.linhaEntrada}>
-          <TextInput
-          value={setDescricao}
+  function somaDespesas() {
+    const total = totalDespesas();
+    setTotalDespesas(total);
+    Alert.alert("Total das despesas", "R$ " + total.toFixed(2));
+  }
+
+
+  return (
+    <SafeAreaView style={estilos.areaSegura}>
+      <View style={estilos.cabecalho}>
+        <Text style={estilos.textoPrincipal}>Olá Marcus!</Text>
+        <Text style={estilos.subtexto}>Quais são as suas despesas?</Text>
+
+      </View>
+
+      <View style={estilos.linhaEntrada}>
+        <TextInput
+          value={descricao}
+          onChangeText={setDescricao}
           placeholder="Descrição..."
           placeholderTextColor="#999"
-          style={estilos.campoTexto}/>
-        </View>
+          style={estilos.campoTexto} />
+      </View>
 
-          <View style={estilos.linhaEntrada}>
-          <TextInput
-          value={setValor}
+      <View style={estilos.linhaEntrada}>
+        <TextInput
+          value={valor}
+          onChangeText={setValor}
           placeholder="Valor R$"
+          keyboardType="numeric"
           placeholderTextColor="#999"
-          style={estilos.campoTexto}/>
-        </View>
+          style={estilos.campoTexto} />
+      </View>
+
+      <View style={estilos.containerBotao}>
+        <Button title="Salvar despesa" onPress={Salvar} />
+        <Button title="Carregar despesas" onPress={carregarDespesas} />
+        <Button title="Limpar tudo" onPress={limparTudo} color="#F44336" />
+        <Button title="Totalizar despesas" onPress={somaDespesas} color="#4CAF50" />
+      </View>
+
+      <FlatList
+        data={despesas}
+        keyExtractor={(item) => String(item.id)}
+        renderItem={({ item }) =>
+          <Text style={estilos.subtexto}>
+            - {item.descricao} | R$ {item.valor} | {item.total}
+          </Text>}
+      />
 
 
-      </SafeAreaView>   
+
+    </SafeAreaView>
 
 
-             
-    )
+
+  )
 };
 
 const estilos = StyleSheet.create({
@@ -90,7 +126,7 @@ const estilos = StyleSheet.create({
 
   cabecalho: {
     paddingHorizontal: 26,
-    paddingTop: 45,
+    paddingTop: 5,
   },
 
   textoPrincipal: {
@@ -119,21 +155,31 @@ const estilos = StyleSheet.create({
     color: "#000"
   },
 
-linhaEntrada: { 
+  linhaEntrada: {
     marginTop: 15,
-    flexDirection: "row", 
-    alignItems: "center", 
-    marginBottom: 8, 
-    gap: 8 
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+    gap: 8
   },
 
-campoTexto: { 
-    flex: 1, 
-    borderWidth: 1, 
-    borderColor: "#020202ff", 
-    borderRadius: 8, 
-    paddingHorizontal: 12, 
-    height: 44 
+  campoTexto: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: "#020202ff",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    height: 44
+  },
+
+  containerBotao: {
+    marginTop: 10,
+    gap: 5,
+    paddingHorizontal: 10,
+  },
+
+  botao: {
+    marginHorizontal: 10,
   },
 
 })
