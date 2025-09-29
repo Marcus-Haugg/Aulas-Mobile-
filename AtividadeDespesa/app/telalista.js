@@ -13,41 +13,51 @@ db.execSync(`
 );
 `);
 
+try{
+  db.execSync (`ALTER TABLE despesas ADD COLUMN categoria TEXT DEFAULT ''`);
+}  catch (e) {}
+
 function getDespesas() {
   return db.getAllSync('SELECT * FROM despesas');
 }
 
-function somaDespesas() {
-  const result = db.getAllSync('SELECT SUM(valor)  AS total  FROM despesas');
-  result[0]?.total || 0;
-}
-
-function insertDespesa(descricao, valor) {
-  db.runSync("INSERT INTO despesas (descricao, valor) VALUES (?, ?)", [
+function insertDespesa(descricao, valor, categoria) {
+  db.runSync("INSERT INTO despesas (descricao, valor, categoria) VALUES (?, ?, ?)", [
     descricao,
     valor,
+    categoria,
   ]);
+}
+
+function getSomaDespesas() {
+  const result = db.getAllSync('SELECT SUM(valor)  AS total  FROM despesas');
+  return result[0]?.total || 0;
 }
 
 function deleteAllDespesas() {
   db.runSync("DELETE FROM despesas");
 }
 
+function deleteDespesa(id){
+  db.runSync("DELETE FROM despesas WHERE id =?", [id])
+}
 
 
 
-export default function sqlite() {
+
+export default function Sqlite() {
 
   const [descricao, setDescricao] = useState("");
   const [valor, setValor] = useState("");
+  const [categoria, setCategoria] = useState("")
   const [despesas, setDespesas] = useState([]);
-  const [totalDespesas, setTotalDespesas] = useState(0);
 
   function Salvar() {
-    if (!descricao.trim() || !valor.trim()) return;
-    insertDespesa(descricao.trim(), parseFloat(valor));
+    if (!descricao.trim() || !valor.trim() || !categoria.trim()) return;
+    insertDespesa(descricao.trim(), parseFloat(valor), categoria.trim());
     setDescricao("");
     setValor("");
+    setCategoria("");
     carregarDespesas();
   }
   function carregarDespesas() {
@@ -60,9 +70,13 @@ export default function sqlite() {
   }
 
   function somaDespesas() {
-    const total = totalDespesas();
-    setTotalDespesas(total);
-    Alert.alert("Total das despesas", "R$ " + total.toFixed(2));
+    const total = getSomaDespesas();
+    Alert.alert("Total das despesas", "R$ " + total.toFixed(2))
+  }
+
+  function excluirDespesa(id) {
+     deleteDespesa(id);
+    carregarDespesas();
   }
 
 
@@ -72,6 +86,15 @@ export default function sqlite() {
         <Text style={estilos.textoPrincipal}>Olá Marcus!</Text>
         <Text style={estilos.subtexto}>Quais são as suas despesas?</Text>
 
+      </View>
+
+       <View style={estilos.linhaEntrada}>
+        <TextInput
+          value={categoria}
+          onChangeText={setCategoria}
+          placeholder="Categoria..."
+          placeholderTextColor="#999"
+          style={estilos.campoTexto} />
       </View>
 
       <View style={estilos.linhaEntrada}>
@@ -103,10 +126,13 @@ export default function sqlite() {
       <FlatList
         data={despesas}
         keyExtractor={(item) => String(item.id)}
-        renderItem={({ item }) =>
-          <Text style={estilos.subtexto}>
-            - {item.descricao} | R$ {item.valor} | {item.total}
-          </Text>}
+        renderItem={({ item }) =>(
+          <View style={estilos.containerLista}>
+            <Text style={estilos.subtexto}>
+              -{item.categoria} | {item.descricao} | R$ {item.valor}
+            </Text>
+             <Button title="X" color="#F44336" onPress={() => excluirDespesa(item.id)} />
+          </View>)}
       />
 
 
@@ -181,5 +207,12 @@ const estilos = StyleSheet.create({
   botao: {
     marginHorizontal: 10,
   },
+
+  containerLista:{
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "space-between",
+  padding: 5
+},
 
 })
