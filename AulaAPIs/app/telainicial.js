@@ -5,10 +5,10 @@ export default function Batata(){
     return (
        <View style={estilos.cabecalho}>
                <Text style={estilos.textoPrincipal}>Olá Marcus!</Text>
-               <Text style={estilos.subtexto}>Adicione as suas despesas!</Text>
+               <Text style={estilos.subtexto}>Acesse o painel para buscar seu Pokemon!</Text>
             <Link href="/telalista" asChild>
                
-                <Button title="Clique aqui para ir para a sua lista!" />
+                <Button title="Vamos achar caracterisicas do seu pokemon preferido pelo nomes!" />
                 
             </Link>
              </View>

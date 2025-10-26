@@ -1,10 +1,27 @@
-import { View, Text, StyleSheet, Button, TextInput, FlatList, Alert } from "react-native";
+import { View, Text, StyleSheet, Button, TextInput, FlatList, Alert, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useState,  } from "react";
+import { useState, useEffect } from "react";
 
+async function getPokemon(pokemon){
+    const resposta = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemon}`);
+    if (resposta.ok) {
+        const payload = await resposta.json();
+        return payload;
+    }
+    return null;
+}
 
 
 export default function AulaAPIs() {
+  const [pokemon, setPokemon] = useState('');
+  const [pokemonImg, setPokemonImg] = useState(null);
+  const [pokemonPesquisar, setPokemonPesquisar] = useState('');
+
+ async function carregarPokemon(){
+        const poke = await getPokemon(pokemonPesquisar);
+        setPokemon(poke.forms?.[0]?.name || 'Pokemon não encontrado')
+        setPokemonImg(poke.sprites?.front_default || null);
+    }
 
 
 
@@ -15,6 +32,17 @@ export default function AulaAPIs() {
         <Text style={estilos.subtexto}>Quais são as suas despesas?</Text>
 
       </View>
+
+       <TextInput style={estilos.caixaTexto}
+                value={pokemonPesquisar}
+                onChangeText={setPokemonPesquisar}
+            />
+            <Button title="Pesquisar" onPress={carregarPokemon}/>
+            <Text>{pokemon}</Text>
+            <Image
+                source={{ uri: pokemonImg }}
+                style={{ width: 40, height: 40 }}
+            />
 
 
 
